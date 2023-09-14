@@ -14,10 +14,12 @@ const (
 	dreamCacheLocation = "~/.cache/dreamland/universe-tau"
 )
 
+// config for caching a dream
 var (
 	cacheDream = []string{"--id", "tau", "--keep"}
 )
 
+// defines the main CLI command for interfacing with the local taubyte network
 var Command = &cli.Command{
 	Name:  "dream",
 	Usage: "Starts and interfaces with a local taubyte network.  All leading arguments to `tau dream ...` are passed to dreamland",
@@ -28,22 +30,26 @@ var Command = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
+		// fetch the selected project
 		project, err := projectLib.SelectedProjectInterface()
 		if err != nil {
 			return err
 		}
 
+		// get the repository for the selected project
 		h := projectLib.Repository(project.Get().Name())
 		projectRepositories, err := h.Open()
 		if err != nil {
 			return err
 		}
 
+		// fetch the current branch of the project
 		branch, err := projectRepositories.CurrentBranch()
 		if err != nil {
 			return err
 		}
 
+		// build the base arguments
 		baseStartDream := []string{"new", "multiverse", "--bind", defaultBind, "--branch", branch}
 		if c.IsSet("cache") {
 			return dreamLib.Execute(append(baseStartDream, cacheDream...)...)

@@ -12,22 +12,27 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// build a specific function after checking if Dreamland system is running
 func buildFunction(ctx *cli.Context) error {
+	// ensure dreamland system is running
 	if !dreamLib.IsRunning() {
 		dreamI18n.Help().IsDreamlandRunning()
 		return dreamI18n.ErrorDreamlandNotStarted
 	}
 
+	// select a function based on the context
 	function, err := functionPrompts.GetOrSelect(ctx)
 	if err != nil {
 		return err
 	}
 
+	// initiliaze the build helper to gather essential build details
 	builder, err := initBuild()
 	if err != nil {
 		return err
 	}
 
+	// prepare data for compling the function
 	compileFor := &dreamLib.CompileForDFunc{
 		ProjectId:  builder.project.Get().Id(),
 		ResourceId: function.Id,
@@ -35,6 +40,7 @@ func buildFunction(ctx *cli.Context) error {
 		Call:       function.Call,
 	}
 
+	// check if an application has been selected
 	if len(builder.selectedApp) > 0 {
 		app, err := applicationLib.Get(builder.selectedApp)
 		if err != nil {
